@@ -1,0 +1,69 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model roles {
+  id              String            @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  name            String?
+  code            String?
+  createdAt       DateTime?         @default(now())
+  updatedAt       DateTime?         @updatedAt
+  rolePermissions role_permission[]
+  users           users[]
+}
+
+model role_permission {
+  id           Int        @id @default(autoincrement())
+  roleId       String
+  permissionId String
+  permission   permission @relation(fields: [permissionId], references: [id])
+  role         roles      @relation(fields: [roleId], references: [id])
+
+  @@index([permissionId], map: "role_permission_permissionId_fkey")
+  @@index([roleId], map: "role_permission_roleId_fkey")
+}
+
+model permission {
+  id              String            @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  create          Boolean           @default(false)
+  delete          Boolean           @default(false)
+  update          Boolean           @default(false)
+  view            Boolean           @default(true)
+  createdAt       DateTime?         @default(now())
+  updatedAt       DateTime?         @updatedAt
+  featureId       String?
+  feature         features?         @relation(fields: [featureId], references: [id])
+  rolePermissions role_permission[]
+
+  @@index([featureId], map: "permission_featureId_fkey")
+}
+
+model features {
+  id          String       @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  name        String?
+  code        String?
+  createdAt   DateTime?    @default(now())
+  updatedAt   DateTime?    @updatedAt
+  permissions permission[]
+}
+
+model users {
+  id          String    @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  fullName    String?   @db.VarChar(255)
+  email       String?   @db.VarChar(255)
+  phoneNumber String?
+  posisi      String?   @default("Staff")
+  password    String?   @db.VarChar(100)
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  roleId      String?
+  role        roles?    @relation(fields: [roleId], references: [id])
+
+  @@index([roleId], map: "users_roleId_fkey")
+}

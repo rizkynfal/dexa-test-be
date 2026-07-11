@@ -1,0 +1,11 @@
+import { ConfigifyModule } from '@itgorillaz/configify';
+import { Module } from '@nestjs/common';
+
+@Module({
+  imports: [
+    ConfigifyModule.forRootAsync({
+      expandConfig: true,
+    }),
+  ],
+})
+export class AppConfigModule {}

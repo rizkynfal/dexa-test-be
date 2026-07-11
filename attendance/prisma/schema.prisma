@@ -1,0 +1,94 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model features {
+  id         String       @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  name       String?
+  code       String?
+  createdAt  DateTime?    @default(now())
+  updatedAt  DateTime?
+  permission permission[]
+}
+
+model permission {
+  id              String            @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  create          Boolean           @default(false)
+  delete          Boolean           @default(false)
+  update          Boolean           @default(false)
+  view            Boolean           @default(true)
+  createdAt       DateTime?         @default(now())
+  updatedAt       DateTime?
+  featureId       String?
+  features        features?         @relation(fields: [featureId], references: [id])
+  role_permission role_permission[]
+
+  @@index([featureId], map: "permission_featureId_fkey")
+}
+
+model role_permission {
+  id           Int        @id @default(autoincrement())
+  roleId       String
+  permissionId String
+  permission   permission @relation(fields: [permissionId], references: [id])
+  roles        roles      @relation(fields: [roleId], references: [id])
+
+  @@index([permissionId], map: "role_permission_permissionId_fkey")
+  @@index([roleId], map: "role_permission_roleId_fkey")
+}
+
+model roles {
+  id              String            @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  name            String?
+  code            String?
+  createdAt       DateTime?         @default(now())
+  updatedAt       DateTime?
+  role_permission role_permission[]
+  users           users[]
+}
+
+model users {
+  id          String       @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  fullName    String?      @db.VarChar(255)
+  email       String?      @db.VarChar(255)
+  password    String?      @db.VarChar(100)
+  createdAt   DateTime?    @default(now())
+  updatedAt   DateTime?
+  roleId      String?
+  phoneNumber String?
+  posisi      String?      @default("Staff")
+  roles       roles?       @relation(fields: [roleId], references: [id])
+  attendances attendance[]
+
+  @@index([roleId], map: "users_roleId_fkey")
+}
+
+enum AttendanceStatus {
+  BELUM_CHECKIN
+  TIDAK_HADIR
+  TERLAMBAT
+  HADIR
+}
+
+model attendance {
+  id               String           @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  checkInNote      String?          @db.Text
+  checkOutNote     String?          @db.Text
+  checkInPhotoUrl  String?
+  checkOutPhotoUrl String?
+  workDate         DateTime?        @db.Date
+  checkInTime      DateTime?
+  checkOutTime     DateTime?
+  status           AttendanceStatus @default(BELUM_CHECKIN)
+  createdAt        DateTime?        @default(now())
+  updatedAt        DateTime?
+  isViewOnly       Boolean          @default(false)
+  userId           String
+  user             users            @relation(fields: [userId], references: [id])
+}
