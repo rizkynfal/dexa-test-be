@@ -18,7 +18,6 @@ import { diskStorage } from 'multer';
 import { ApiConsumes } from '@nestjs/swagger';
 import fs from 'fs';
 import path from 'path';
-import { AuthGuard } from '@nestjs/passport';
 const serviceConfig = SERVICES_CONFIG;
 @Controller('attendance')
 export class AttendanceControllerGateway {
@@ -75,7 +74,7 @@ export class AttendanceControllerGateway {
     @Body() dto: CheckInDto,
     @UploadedFile() photo: Express.Multer.File,
   ) {
-    const pattern = { cmd: '[,]' };
+    const pattern = { cmd: '[user_check_in]' };
     const photoUrl = `/uploads/attendance/checkin/${id}/${photo.filename}`;
     // send() returns an RxJS Observable. Converted to a Promise using firstValueFrom.
     return await serviceCall(

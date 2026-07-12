@@ -1,4 +1,4 @@
-import { PrismaService } from '@auth/lib';
+import { comparePassword, PrismaService } from '@auth/lib';
 import { Injectable } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { AppException, STATUS_CODE_SERVICE } from 'src/api/common';
@@ -33,7 +33,9 @@ export class LoginService {
         null,
       );
     }
-    if (user.password !== password) {
+    const isPasswordValid =
+      user.password && (await comparePassword(password, user.password));
+    if (!isPasswordValid) {
       throw new AppException(
         STATUS_CODE_SERVICE.BAD_REQUEST,
         'USER_NOT_FOUND',

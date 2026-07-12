@@ -1,4 +1,4 @@
-import { PrismaService } from '@user/lib';
+import { generatePassword, hashPassword, PrismaService } from '@user/lib';
 import { Injectable } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AppException } from '@user/common';
@@ -36,7 +36,9 @@ export class UserService {
     if (!role) {
       throw new AppException(404, 'ROLE_NOT_FOUND', 'Role not found');
     }
-    return await this.prismaApp.users.create({
+    const generatedPassword = generatePassword();
+    const hashedPassword = await hashPassword(generatedPassword);
+    const newUser = await this.prismaApp.users.create({
       data: {
         id: uuidv7(),
         createdAt: new Date(),
@@ -46,8 +48,11 @@ export class UserService {
         email,
         phoneNumber,
         posisi,
+        password: hashedPassword,
       },
     });
+    console.log(generatedPassword);
+    return { ...newUser, password: generatedPassword };
   }
   async updateUser(id: string, dto: UpdateUserDto) {
     const { email, name, phoneNumber, posisi } = dto;

@@ -1,6 +1,6 @@
 import { Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AbsensiModule, UserModule } from '@user/modules';
+import { UserModule } from '@user/modules';
 import { LoggerModule } from 'nestjs-pino';
 import { ConfigModule } from '@user/config';
 import { PrismaService } from './lib/prisma/prisma.service';
@@ -73,7 +73,6 @@ import { PrismaService } from './lib/prisma/prisma.service';
       },
       exclude: [{ method: RequestMethod.ALL, path: 'docs' }],
     }),
-    AbsensiModule,
     UserModule
   ],
   controllers: [AppController],
